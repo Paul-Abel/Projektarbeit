@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class GUI {
@@ -7,7 +9,7 @@ public class GUI {
         JFrame gui = frame();
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
+        //Alle Label werden hinzugefügt
         JLabel labelTerminal = normal_label("Terminal:", 100, 100);
         JLabel labelNichtTerminal = normal_label("Nicht-Terminal:", 100, 160);
         JLabel labelStartsymbol = normal_label("Startsymbol:", 100, 220);
@@ -17,6 +19,7 @@ public class GUI {
         gui.add(labelStartsymbol);
         gui.add(labelRegel);
 
+        //Alle Eingabefelder werden hinzugefügt
         JTextField textFieldTerminal = normal_textfield(200,100);
         JTextField textFieldNichtTerminal = normal_textfield(200,160);
         JTextField textFieldStartsymbol = normal_textfield(200,220);
@@ -26,23 +29,63 @@ public class GUI {
         gui.add(textFieldStartsymbol);
         gui.add(textFieldRegel);
 
+        //Alle Buttons werden hinzugefügt
         JButton buttonAddRule =normal_button("Regel bestätigen", 200,340);
         JButton buttonCommitInput =normal_button("Eingabe bestätigen", 200,400);
+        JButton buttonSingleStep =normal_button("Einzelschritt", 200,25);
+        JButton buttonMultiStep =normal_button("Regel ausführen", 400,25);
+        JButton buttonAllStep =normal_button("Alles ausführen", 600,25);
         gui.add(buttonAddRule);
         gui.add(buttonCommitInput);
+        gui.add(buttonSingleStep);
+        gui.add(buttonMultiStep);
+        gui.add(buttonAllStep);
 
+        //Alle TextAreas werden hinzugefügt
+        JTextArea textAreaInput = new JTextArea();
+        JTextArea textAreaLog = new JTextArea();
+        JTextArea textAreaOutput = new JTextArea();
+        JScrollPane textAreaInputScroll = textAreaScrollable(400,100,200,300, textAreaInput);
+        JScrollPane textAreaOutputScroll = textAreaScrollable(650,100,200,300, textAreaOutput);
+        JScrollPane textAreaLogScroll = textAreaScrollable(25,500,1230,150, textAreaLog);
+        gui.add(textAreaInputScroll);
+        gui.add(textAreaLogScroll);
+        gui.add(textAreaOutputScroll);
 
-
-        JTextArea textArea = new JTextArea();
-        textArea.setBounds(400, 100 ,200,300);
-        gui.add(textArea);
-        JScrollPane scrollableTextArea = new JScrollPane();
-        scrollableTextArea.setBounds(400, 100 ,200,300);
-        scrollableTextArea.setViewportView(textArea);
-        gui.getContentPane().add(scrollableTextArea);
 
         gui.setLayout(null);//using no layout managers
         gui.setVisible(true);//making the frame visible
+
+        buttonAddRule.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textAreaLog.append("Add Rule\n");
+            }
+        });
+        buttonCommitInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textAreaLog.append("Commit Input\n");
+            }
+        });
+        buttonAllStep.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textAreaLog.append("All Steps\n");
+            }
+        });
+        buttonMultiStep.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textAreaLog.append("Multi Steps\n");
+            }
+        });
+        buttonSingleStep.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textAreaLog.append("SingleSteps\n");
+            }
+        });
 
     }
 
@@ -65,6 +108,14 @@ public class GUI {
         JTextField textField= new JTextField();
         textField.setBounds(x,y,150, 40);
         return textField;
+    }
+
+    public static JScrollPane textAreaScrollable(int x, int y, int width, int heigh,JTextArea textArea){
+        textArea.setEditable(false);
+        JScrollPane scrollableTextArea = new JScrollPane();
+        scrollableTextArea.setBounds(x,y,width,heigh);
+        scrollableTextArea.setViewportView(textArea);
+        return scrollableTextArea;
     }
 
 
