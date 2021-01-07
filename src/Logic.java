@@ -183,6 +183,22 @@ public class Logic {
         String log_output = "";
         boolean input_correct = true;
 
+        if(input_start_variable_list.size()==0){
+            input_correct = false;
+            log_output += "Bitte mindestens eine Startvariable einfügen.\n";
+        }
+        if(input_variable_list.size()==0){
+            input_correct = false;
+            log_output += "Bitte mindestens eine Variable einfügen.\n";
+        }
+        if(input_terminal_list.size()==0){
+            input_correct = false;
+            log_output += "Bitte mindestens eine Terminale einfügen.\n";
+        }
+        if(input_rules_map.keySet().size()==0) {
+            input_correct = false;
+            log_output += "Bitte mindestens eome Regel einfügen.\n";
+        }
         //Check if startvariable is in variable
         for (String a : input_start_variable_list) {
             if (!input_variable_list.contains(a.toUpperCase())) {

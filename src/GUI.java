@@ -91,6 +91,14 @@ public class GUI  {
                 List<String> returnList = logic.check_input();
                 textAreaLog.append(returnList.get(0) +"\n");
                 textAreaInput.setText(returnList.get(1) +"\n");
+                if("Eingabe stimmt.".equals(returnList.get(0))){
+                    buttonAddRule.setEnabled(false);
+                    buttonAllStep.setEnabled(true);
+                    buttonCheckInput.setEnabled(false);
+                    buttonCommitInput.setEnabled(false);
+                    buttonMultiStep.setEnabled(true);
+                    buttonSingleStep.setEnabled(true);
+                }
             }
         });
         buttonAllStep.addActionListener(new ActionListener() {
