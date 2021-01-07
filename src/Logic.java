@@ -7,6 +7,13 @@ public class Logic {
     List<String> input_start_variable_list = new ArrayList<String>();
     Map<String, List<String>> input_rules_map = new HashMap<String, List<String>>();
 
+    List<String> output_terminal_list = new ArrayList<String>();
+    List<String> output_variable_list = new ArrayList<String>();
+    List<String> output_start_variable_list = new ArrayList<String>();
+    Map<String, List<String>> output_rules_map = new HashMap<String, List<String>>();
+
+
+
     //Checks the input and add a rule to the input_rule_map
     //rule_input is a rule from the gui, which should be wrote in a certain way. (Variable:rule1,rule2,rule3...)
     public List confirm_rule(String rule_input ){
@@ -183,6 +190,7 @@ public class Logic {
         String log_output = "";
         boolean input_correct = true;
 
+        //Check if input is empty
         if(input_start_variable_list.size()==0){
             input_correct = false;
             log_output += "Bitte mindestens eine Startvariable einfügen.\n";
@@ -199,6 +207,7 @@ public class Logic {
             input_correct = false;
             log_output += "Bitte mindestens eome Regel einfügen.\n";
         }
+
         //Check if startvariable is in variable
         for (String a : input_start_variable_list) {
             if (!input_variable_list.contains(a.toUpperCase())) {
@@ -251,10 +260,25 @@ public class Logic {
         return returnList;
     }
 
+    //Resets all global variables
+    public void clear(){
+        input_terminal_list.clear();
+        input_variable_list.clear();
+        input_start_variable_list.clear();
+        input_rules_map.clear();
+
+        output_rules_map.clear();
+        output_start_variable_list.clear();
+        output_terminal_list.clear();
+        output_variable_list.clear();
+    }
     public List single_step(){
         return null;
     }
     public List multi_step(){
+        return null;
+    }
+    public List rule_step(){
         return null;
     }
     public List all_step(){
@@ -276,5 +300,8 @@ public class Logic {
                 "Startvariable:\t" + input_start_variable_list.toString() + "\n"+
                 "Regeln" + rule;
         return value;
+    }
+    public String getOutputString(){
+        return null;
     }
 }

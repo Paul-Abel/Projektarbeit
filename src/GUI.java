@@ -38,21 +38,24 @@ public class GUI  {
         //Add buttons
         JButton buttonAddRule =normal_button("Regel bestätigen", 200,400);
         JButton buttonCommitInput =normal_button("Eingabe bestätigen", 200,280);
-        JButton buttonCheckInput =normal_button("Alles prüfen", 200,25);
+        JButton buttonCheckInput =normal_button("Alles prüfen", 200,460);
         JButton buttonSingleStep =normal_button("Einzelschritt", 400,25);
-        JButton buttonMultiStep =normal_button("Regel ausführen", 600,25);
-        JButton buttonAllStep =normal_button("Alles ausführen", 800,25);
-        JButton buttonNewInput =normal_button("Neue Eingabe", 200,460);
+        JButton buttonMultiStep =normal_button("Einzelschritt", 600,25);
+        JButton buttonRuleStep =normal_button("Regel ausführen", 800,25);
+        JButton buttonAllStep =normal_button("Alles ausführen", 1000,25);
+        JButton buttonNewInput =normal_button("Neue Eingabe", 200,25);
         buttonAllStep.setEnabled(false);
-        buttonMultiStep.setEnabled(false);
+        buttonRuleStep.setEnabled(false);
         buttonSingleStep.setEnabled(false);
+        buttonMultiStep.setEnabled(false);
         gui.add(buttonAddRule);
         gui.add(buttonCommitInput);
         gui.add(buttonCheckInput);
         gui.add(buttonSingleStep);
-        gui.add(buttonMultiStep);
+        gui.add(buttonRuleStep);
         gui.add(buttonAllStep);
         gui.add(buttonNewInput);
+        gui.add(buttonMultiStep);
 
         //Add textAreas
         JTextArea textAreaInput = new JTextArea();
@@ -93,11 +96,12 @@ public class GUI  {
                 textAreaInput.setText(returnList.get(1) +"\n");
                 if("Eingabe stimmt.".equals(returnList.get(0))){
                     buttonAddRule.setEnabled(false);
-                    buttonAllStep.setEnabled(true);
                     buttonCheckInput.setEnabled(false);
                     buttonCommitInput.setEnabled(false);
-                    buttonMultiStep.setEnabled(true);
+                    buttonAllStep.setEnabled(true);
+                    buttonRuleStep.setEnabled(true);
                     buttonSingleStep.setEnabled(true);
+                    buttonMultiStep.setEnabled(true);
                 }
             }
         });
@@ -107,7 +111,7 @@ public class GUI  {
                 textAreaLog.append("H");
             }
         });
-        buttonMultiStep.addActionListener(new ActionListener() {
+        buttonRuleStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 textAreaLog.append("Multi Steps\n");
@@ -125,7 +129,32 @@ public class GUI  {
         buttonNewInput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaLog.append("Neuer Input\n");
+                //clear variables in logic
+                logic.clear();
+
+                //set Buttons on their default
+                buttonAddRule.setEnabled(true);
+                buttonCheckInput.setEnabled(true);
+                buttonCommitInput.setEnabled(true);
+                buttonAllStep.setEnabled(false);
+                buttonRuleStep.setEnabled(false);
+                buttonSingleStep.setEnabled(false);
+                buttonMultiStep.setEnabled(false);
+
+                textFieldRule.setText("");
+                textFieldStartsymbol.setText("");
+                textFieldTerminal.setText("");
+                textFieldVariable.setText("");
+
+                textAreaInput.setText("");
+                textAreaOutput.setText("");
+                textAreaLog.setText("");
+            }
+        });
+        buttonMultiStep.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
             }
         });
 
