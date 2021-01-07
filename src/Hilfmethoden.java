@@ -42,12 +42,5 @@ public class Hilfmethoden {
         System.out.println(rules.get("Key 1"));
         System.out.println(rules.get("Key 2"));
         System.out.println(rules.get("Key 3"));
-
-    }
-
-    public void vorgehen(){
-        // 1 einlesen und StateMachine erstellen
-        // 
-
     }
 }

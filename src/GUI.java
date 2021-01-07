@@ -1,11 +1,13 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 
-public class GUI {
+public class GUI  {
 
     public static void main(String[] args) {
+        Logic logic = new Logic();
         JFrame gui = frame();
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -32,14 +34,21 @@ public class GUI {
         //Alle Buttons werden hinzugefügt
         JButton buttonAddRule =normal_button("Regel bestätigen", 200,340);
         JButton buttonCommitInput =normal_button("Eingabe bestätigen", 200,400);
-        JButton buttonSingleStep =normal_button("Einzelschritt", 200,25);
-        JButton buttonMultiStep =normal_button("Regel ausführen", 400,25);
-        JButton buttonAllStep =normal_button("Alles ausführen", 600,25);
+        JButton buttonCheckInput =normal_button("Alles prüfen", 200,25);
+        JButton buttonSingleStep =normal_button("Einzelschritt", 400,25);
+        JButton buttonMultiStep =normal_button("Regel ausführen", 600,25);
+        JButton buttonAllStep =normal_button("Alles ausführen", 800,25);
+        JButton buttonNewInput =normal_button("Neue Eingabe", 1000,25);
+        buttonAllStep.setEnabled(false);
+        buttonMultiStep.setEnabled(false);
+        buttonSingleStep.setEnabled(false);
         gui.add(buttonAddRule);
         gui.add(buttonCommitInput);
+        gui.add(buttonCheckInput);
         gui.add(buttonSingleStep);
         gui.add(buttonMultiStep);
         gui.add(buttonAllStep);
+        gui.add(buttonNewInput);
 
         //Alle TextAreas werden hinzugefügt
         JTextArea textAreaInput = new JTextArea();
@@ -59,13 +68,25 @@ public class GUI {
         buttonAddRule.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaLog.append("Add Rule\n");
+                List<String> returnList = logic.confirm_rule(textFieldRegel.getText());
+                textAreaLog.append(returnList.get(0) +"\n");
+                textAreaInput.setText(returnList.get(1) +"\n");
             }
         });
         buttonCommitInput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaLog.append("Commit Input\n");
+                List<String> returnList = logic.commit_input(textFieldTerminal.getText(),textFieldNichtTerminal.getText(),textFieldStartsymbol.getText());
+                textAreaLog.append(returnList.get(0) +"\n");
+                textAreaInput.setText(returnList.get(1) +"\n");
+            }
+        });
+        buttonCheckInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<String> returnList = logic.check_input();
+                textAreaLog.append(returnList.get(0) +"\n");
+                textAreaInput.setText(returnList.get(1) +"\n");
             }
         });
         buttonAllStep.addActionListener(new ActionListener() {
@@ -78,12 +99,21 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 textAreaLog.append("Multi Steps\n");
+
             }
         });
         buttonSingleStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaLog.append("SingleSteps\n");
+                List<String> returnList = logic.single_step();
+                textAreaLog.append(returnList.get(0) +"\n");
+                textAreaOutput.append(returnList.get(1) +"\n");
+            }
+        });
+        buttonNewInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textAreaLog.append("Neuer Input\n");
             }
         });
 
@@ -109,15 +139,12 @@ public class GUI {
         textField.setBounds(x,y,150, 40);
         return textField;
     }
-
-    public static JScrollPane textAreaScrollable(int x, int y, int width, int heigh,JTextArea textArea){
+    public static JScrollPane textAreaScrollable(int x, int y, int width, int height, JTextArea textArea){
         textArea.setEditable(false);
         JScrollPane scrollableTextArea = new JScrollPane();
-        scrollableTextArea.setBounds(x,y,width,heigh);
+        scrollableTextArea.setBounds(x,y,width,height);
         scrollableTextArea.setViewportView(textArea);
         return scrollableTextArea;
     }
-
-
 }
 
