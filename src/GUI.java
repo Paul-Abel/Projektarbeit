@@ -11,34 +11,38 @@ public class GUI  {
         JFrame gui = frame();
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //Alle Label werden hinzugefügt
+        //Add labels
         JLabel labelTerminal = normal_label("Terminal:", 100, 100);
-        JLabel labelNichtTerminal = normal_label("Nicht-Terminal:", 100, 160);
+        JLabel labelVariable = normal_label("Variable:", 100, 160);
         JLabel labelStartsymbol = normal_label("Startsymbol:", 100, 220);
-        JLabel labelRegel = normal_label("Regeln:", 100, 280);
+        JLabel labelRule = normal_label("Regeln:", 100, 340);
+        JLabel labelInput =normal_label("Input:", 400, 70);
+        JLabel labelOutput =normal_label("Output:", 750, 70);
         gui.add(labelTerminal);
-        gui.add(labelNichtTerminal);
+        gui.add(labelVariable);
         gui.add(labelStartsymbol);
-        gui.add(labelRegel);
+        gui.add(labelRule);
+        gui.add(labelInput);
+        gui.add(labelOutput);
 
-        //Alle Eingabefelder werden hinzugefügt
+        //Add textfields
         JTextField textFieldTerminal = normal_textfield(200,100);
-        JTextField textFieldNichtTerminal = normal_textfield(200,160);
+        JTextField textFieldVariable = normal_textfield(200,160);
         JTextField textFieldStartsymbol = normal_textfield(200,220);
-        JTextField textFieldRegel = normal_textfield(200,280);
+        JTextField textFieldRule = normal_textfield(200,340);
         gui.add(textFieldTerminal);
-        gui.add(textFieldNichtTerminal);
+        gui.add(textFieldVariable);
         gui.add(textFieldStartsymbol);
-        gui.add(textFieldRegel);
+        gui.add(textFieldRule);
 
-        //Alle Buttons werden hinzugefügt
-        JButton buttonAddRule =normal_button("Regel bestätigen", 200,340);
-        JButton buttonCommitInput =normal_button("Eingabe bestätigen", 200,400);
+        //Add buttons
+        JButton buttonAddRule =normal_button("Regel bestätigen", 200,400);
+        JButton buttonCommitInput =normal_button("Eingabe bestätigen", 200,280);
         JButton buttonCheckInput =normal_button("Alles prüfen", 200,25);
         JButton buttonSingleStep =normal_button("Einzelschritt", 400,25);
         JButton buttonMultiStep =normal_button("Regel ausführen", 600,25);
         JButton buttonAllStep =normal_button("Alles ausführen", 800,25);
-        JButton buttonNewInput =normal_button("Neue Eingabe", 1000,25);
+        JButton buttonNewInput =normal_button("Neue Eingabe", 200,460);
         buttonAllStep.setEnabled(false);
         buttonMultiStep.setEnabled(false);
         buttonSingleStep.setEnabled(false);
@@ -50,13 +54,13 @@ public class GUI  {
         gui.add(buttonAllStep);
         gui.add(buttonNewInput);
 
-        //Alle TextAreas werden hinzugefügt
+        //Add textAreas
         JTextArea textAreaInput = new JTextArea();
         JTextArea textAreaLog = new JTextArea();
         JTextArea textAreaOutput = new JTextArea();
-        JScrollPane textAreaInputScroll = textAreaScrollable(400,100,200,300, textAreaInput);
-        JScrollPane textAreaOutputScroll = textAreaScrollable(650,100,200,300, textAreaOutput);
-        JScrollPane textAreaLogScroll = textAreaScrollable(25,500,1230,150, textAreaLog);
+        JScrollPane textAreaInputScroll = textAreaScrollable(400,100,300,400, textAreaInput);
+        JScrollPane textAreaOutputScroll = textAreaScrollable(750,100,300,400, textAreaOutput);
+        JScrollPane textAreaLogScroll = textAreaScrollable(25,550,1230,300, textAreaLog);
         gui.add(textAreaInputScroll);
         gui.add(textAreaLogScroll);
         gui.add(textAreaOutputScroll);
@@ -68,7 +72,7 @@ public class GUI  {
         buttonAddRule.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<String> returnList = logic.confirm_rule(textFieldRegel.getText());
+                List<String> returnList = logic.confirm_rule(textFieldRule.getText());
                 textAreaLog.append(returnList.get(0) +"\n");
                 textAreaInput.setText(returnList.get(1) +"\n");
             }
@@ -76,7 +80,7 @@ public class GUI  {
         buttonCommitInput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<String> returnList = logic.commit_input(textFieldTerminal.getText(),textFieldNichtTerminal.getText(),textFieldStartsymbol.getText());
+                List<String> returnList = logic.commit_input(textFieldTerminal.getText(),textFieldVariable.getText(),textFieldStartsymbol.getText());
                 textAreaLog.append(returnList.get(0) +"\n");
                 textAreaInput.setText(returnList.get(1) +"\n");
             }
@@ -92,7 +96,7 @@ public class GUI  {
         buttonAllStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaLog.append("All Steps\n");
+                textAreaLog.append("H");
             }
         });
         buttonMultiStep.addActionListener(new ActionListener() {
@@ -121,7 +125,7 @@ public class GUI  {
 
     public static JFrame frame(){
         JFrame gui = new JFrame();//creating instance of JFrame
-        gui.setSize(1280,720);//400 width and 500 height
+        gui.setSize(1280,900);//400 width and 500 height
         return gui;
     }
     public static JButton normal_button(String button_text, int x, int y){
