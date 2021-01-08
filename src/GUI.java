@@ -40,7 +40,7 @@ public class GUI  {
         JButton buttonCommitInput =normal_button("Eingabe bestätigen", 200,280);
         JButton buttonCheckInput =normal_button("Alles prüfen", 200,460);
         JButton buttonSingleStep =normal_button("Einzelschritt", 400,25);
-        JButton buttonMultiStep =normal_button("Einzelschritt", 600,25);
+        JButton buttonMultiStep =normal_button("Multischritte", 600,25);
         JButton buttonRuleStep =normal_button("Regel ausführen", 800,25);
         JButton buttonAllStep =normal_button("Alles ausführen", 1000,25);
         JButton buttonNewInput =normal_button("Neue Eingabe", 200,25);
@@ -102,19 +102,24 @@ public class GUI  {
                     buttonRuleStep.setEnabled(true);
                     buttonSingleStep.setEnabled(true);
                     buttonMultiStep.setEnabled(true);
+                    textAreaOutput.setText(returnList.get(2));
                 }
             }
         });
         buttonAllStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaLog.append("H");
+                List<String> returnList = logic.all_step();
+                textAreaLog.append(returnList.get(0) +"\n");
+                textAreaOutput.setText(returnList.get(1) +"\n");
             }
         });
         buttonRuleStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaLog.append("Multi Steps\n");
+                List<String> returnList = logic.rule_step();
+                textAreaLog.append(returnList.get(0) +"\n");
+                textAreaOutput.setText(returnList.get(1) +"\n");
 
             }
         });
@@ -123,7 +128,7 @@ public class GUI  {
             public void actionPerformed(ActionEvent e) {
                 List<String> returnList = logic.single_step();
                 textAreaLog.append(returnList.get(0) +"\n");
-                textAreaOutput.append(returnList.get(1) +"\n");
+                textAreaOutput.setText(returnList.get(1) +"\n");
             }
         });
         buttonNewInput.addActionListener(new ActionListener() {
@@ -154,7 +159,9 @@ public class GUI  {
         buttonMultiStep.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                List<String> returnList = logic.multi_step();
+                textAreaLog.append(returnList.get(0) +"\n");
+                textAreaOutput.setText(returnList.get(1) +"\n");
             }
         });
 
