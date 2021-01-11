@@ -18,7 +18,7 @@ public class Logic {
     Dictionary terminal_translate = new Hashtable();
 
 
-    final int count_rule = 2;
+    final int count_rule = 3;
     int next_rule = 0;
     String next_rule_variable = "";
     String next_rule_content = "";
@@ -294,6 +294,10 @@ public class Logic {
         while(keys.hasMoreElements()){
             startvariable_translate.remove(keys.nextElement());
         }
+        Enumeration keys1 = startvariable_translate.keys();
+        while(keys1.hasMoreElements()){
+            startvariable_translate.remove(keys1.nextElement());
+        }
         chain_rule_map.clear();
         chain_rule_list.clear();
         chainrule_state=0;
@@ -331,6 +335,9 @@ public class Logic {
                 }
                 break;
             case 2:
+                while(next_rule==2){
+                    multi_step();
+                }
                 break;
         }
 
@@ -362,6 +369,9 @@ public class Logic {
 
                 break;
             case 2:
+                for(int i=0; i<output_rules_map.get(next_rule_variable).size();i++){
+                    log_output+= single_step().get(0);
+                }
                 break;
         }
 
@@ -380,6 +390,9 @@ public class Logic {
                 break;
             case 1:
                 log_output+=deleteChainRule()+ chain_rule_map.toString()+"\n";
+                break;
+            case 2:
+                log_output+=replaceTerminal()+ terminal_translate.toString()+"\n";
                 break;
         }
 
@@ -478,7 +491,7 @@ public class Logic {
 
         //Define some inter variables
         List<String> returnList = new ArrayList<String>();
-        boolean add_new_terminal = true;
+        boolean add_new_variable = true;
         String log_output = "";
         String to_replaced = "";
         String replaced = null;
@@ -493,12 +506,12 @@ public class Logic {
                 while (keys.hasMoreElements()){
                     String t =(String) keys.nextElement();
                     if(t.equals(to_replaced)){
-                        add_new_terminal = false;
+                        add_new_variable = false;
                     }
                 }
 
                 //Define new terminal and add it to the lists
-                if(add_new_terminal) {
+                if(add_new_variable) {
                     output_rules_map.put("S" + startvariable_translate.size(), output_rules_map.get(to_replaced));
                     output_variable_list.add("S" + startvariable_translate.size());
                     log_output += "Es wurde die Hiflsvariable S" + startvariable_translate.size() + " erstellt und alle Regeln von " + to_replaced + " dieser hinzugefügt.\n";
@@ -518,6 +531,7 @@ public class Logic {
         return returnList;
     }
 
+    //delete every chainrule
     public List deleteChainRule(){
         //Define some inter variables
         List<String> returnList = new ArrayList<String>();
@@ -528,7 +542,7 @@ public class Logic {
             String old_next_rule_terminal = next_rule_variable;
 
             //Check for each rule for a single Variable
-            while (old_next_rule_terminal == next_rule_variable) {
+            while (old_next_rule_terminal == next_rule_variable &&next_rule==1) {
                 if (output_variable_list.contains(next_rule_content)) {
                     if (!chain_rule_map.containsKey(next_rule_variable)) {
                         chain_rule_map.put(next_rule_variable, new ArrayList<String>());
@@ -570,7 +584,7 @@ public class Logic {
                 }
             }
             String old_next_var = next_rule_variable;
-            while(old_next_var ==next_rule_variable){
+            while(old_next_var ==next_rule_variable&&next_rule==1){
                 setNextState();
             }
 
@@ -586,7 +600,7 @@ public class Logic {
                 for(String a:chain_rule_list){
                     chain_rule_map.get(left_side).add(a);
                 }
-                log_output+="kettenregel aufgelöst, Chainrulestate=" +chainrule_state  ;
+                log_output+="kettenregel aufgelöst, Chainrulestate=" +chainrule_state ;
             }
         }
         if(next_rule==2&&chainrule_state==1){chainrule_state=2;}
@@ -596,6 +610,7 @@ public class Logic {
         return returnList;
     }
 
+    //adds every chainrule
     public void addToChainRule(String left_side){
         if(chain_rule_map.containsKey(left_side)) {
             List<String> help_list = chain_rule_map.get(left_side);
@@ -606,5 +621,52 @@ public class Logic {
                 }
             }
         }
+    }
+
+    //replace
+    public List replaceTerminal(){
+        //Define some inter variables
+        List<String> returnList = new ArrayList<String>();
+        String log_output = "";
+        String word_to_check = next_rule_content;
+        boolean add_new_variable = true;
+        int count_char_replace = 0;
+        for(int i=0; i<word_to_check.length();i++) {
+            String char_to_check =String.valueOf(word_to_check.charAt(i));
+            if (output_terminal_list.contains(char_to_check)&&word_to_check.length()>1) {
+
+                //Check if already a replace variable exits
+                Enumeration keys = terminal_translate.keys();
+                while (keys.hasMoreElements()){
+                    String t =(String) keys.nextElement();
+                    if(t.equals(char_to_check)){
+                        add_new_variable = false;
+                    }
+                }
+
+                //Define new terminal and add it to the lists
+                if(add_new_variable) {
+                    List<String> rule_to_add = new ArrayList<>();
+                    rule_to_add.add(char_to_check);
+                    output_rules_map.put("T" + terminal_translate.size(), rule_to_add);
+                    output_variable_list.add("T" + terminal_translate.size());
+                    log_output += "Es wurde die Hiflsvariable T" + terminal_translate.size() + " erstellt und diese ersetzt " +char_to_check+".\n";
+                    terminal_translate.put(char_to_check, "T" + terminal_translate.size());
+                }
+
+                String replace_Char = (String) terminal_translate.get(char_to_check);
+                String replace = helpmethod.replaceChar(i+count_char_replace, next_rule_content, replace_Char);
+                int j = output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
+                output_rules_map.get(next_rule_variable).set(j,replace);
+                output_rules_map.put(replace_Char,new ArrayList<>());
+                output_rules_map.get(replace_Char).add(char_to_check);
+                next_rule_content=replace;
+                count_char_replace++;
+            }
+        }
+
+        setNextState();
+        returnList.add(log_output);
+        return returnList;
     }
 }
