@@ -12,13 +12,18 @@ public class Logic {
     List<String> output_start_variable_list = new ArrayList<String>();
     Map<String, List<String>> output_rules_map = new HashMap<String, List<String>>();
 
+    Map<String, List<String>> chain_rule_map = new HashMap<String, List<String>>();
+    List<String> chain_rule_list = new ArrayList<String>();
     Dictionary startvariable_translate = new Hashtable();
+    Dictionary terminal_translate = new Hashtable();
 
-    final int count_rule = 1;
+
+    final int count_rule = 2;
     int next_rule = 0;
-    String next_rule_terminal = "";
+    String next_rule_variable = "";
     String next_rule_content = "";
 
+    int chainrule_state = 0;
 
 
 
@@ -259,8 +264,8 @@ public class Logic {
             output_variable_list = input_variable_list;
             output_terminal_list = input_terminal_list;
             output_start_variable_list = input_start_variable_list;
-            next_rule_terminal = (String) output_rules_map.keySet().toArray()[0];
-            next_rule_content = output_rules_map.get(next_rule_terminal).get(0);
+            next_rule_variable = (String) output_rules_map.keySet().toArray()[0];
+            next_rule_content = output_rules_map.get(next_rule_variable).get(0);
             log_output += "Eingabe stimmt.";
         }
 
@@ -289,8 +294,11 @@ public class Logic {
         while(keys.hasMoreElements()){
             startvariable_translate.remove(keys.nextElement());
         }
+        chain_rule_map.clear();
+        chain_rule_list.clear();
+        chainrule_state=0;
         next_rule = 0;
-        next_rule_terminal = "";
+        next_rule_variable = "";
         next_rule_content = "";
     }
 
@@ -313,13 +321,14 @@ public class Logic {
 
         switch(next_rule) {
             case 0:
-                for (String variable : output_rules_map.keySet()) {
-                    String a = variable;
-                    Set<String> b = output_rules_map.keySet();
-                    log_output+=multi_step().get(0);
+                while(next_rule==0){
+                    multi_step();
                 }
                 break;
             case 1:
+                while(next_rule==1){
+                    multi_step();
+                }
                 break;
             case 2:
                 break;
@@ -333,17 +342,24 @@ public class Logic {
     public List multi_step(){
         List<String> returnList = new ArrayList<String>();
         String log_output = "";
-        String actual_terminal = next_rule_terminal;
+        String actual_terminal = next_rule_variable;
         switch(next_rule) {
             case 0:
-                for (String rule : output_rules_map.get(next_rule_terminal)) {
-                    if(actual_terminal!=next_rule_terminal){
+                for (String rule : output_rules_map.get(next_rule_variable)) {
+                    if(actual_terminal!= next_rule_variable){
                         break;
                     }
                     log_output+= single_step().get(0);
                 }
                 break;
             case 1:
+                while(chainrule_state==0){
+                    log_output+= single_step().get(0);
+                }
+                while(chainrule_state==1){
+                    log_output+= single_step().get(0);
+                }
+
                 break;
             case 2:
                 break;
@@ -361,7 +377,9 @@ public class Logic {
         switch(next_rule) {
             case 0:
                 log_output+=replaceStartvariable();
-                setNextState();
+                break;
+            case 1:
+                log_output+=deleteChainRule()+ chain_rule_map.toString()+"\n";
                 break;
         }
 
@@ -400,12 +418,23 @@ public class Logic {
         String next_rule_output = "";
         switch (next_rule){
             case 0:
-                next_rule_output = "Startvariable auf rechter Seite entfernen.\n";
+                next_rule_output = "Startvariable auf rechter Seite entfernen.";
+                break;
+            case 1:
+                next_rule_output = "Entferne Kettenregel.";
+                break;
+            case 2:
+                next_rule_output = "Ersetze Terminale durch eine Variable";
+                break;
+            case 3:
+                next_rule_output = "Erstelle nur Regeln der Länge 2";
+
+
         }
 
         String value =
                 "Nächster Schritt:"+ next_rule_output +"\n"+
-                        "Nächste Regel:" +next_rule_terminal + ": "+next_rule_content+"\n"+
+                        "Nächste Regel:" + next_rule_variable + ": "+next_rule_content+"\n\n"+
                         "Terminal:\t"+ output_terminal_list.toString()+"\n"+
                         "Variable:\t" + output_variable_list.toString() + "\n" +
                         "Startvariable:\t" + output_start_variable_list.toString() + "\n"+
@@ -419,27 +448,27 @@ public class Logic {
         String[] keys = new String[a.length];
         System.arraycopy(a,0,keys,0,a.length);
         int key_index = 0;
-        int value_index =output_rules_map.get(next_rule_terminal).indexOf(next_rule_content);
-        int b=output_rules_map.get(next_rule_terminal).size();
+        int value_index =output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
+        int b=output_rules_map.get(next_rule_variable).size();
 
-        if(value_index+1 <output_rules_map.get(next_rule_terminal).size()){
-            next_rule_content = output_rules_map.get(next_rule_terminal).get(value_index+1);
+        if(value_index+1 <output_rules_map.get(next_rule_variable).size()){
+            next_rule_content = output_rules_map.get(next_rule_variable).get(value_index+1);
         }
         else {
             for(int i = 0; i < keys.length; i++) {
-                if(keys[i] == next_rule_terminal) {
+                if(keys[i] == next_rule_variable) {
                     key_index = i;
                     break;
                 }
             }
             if(key_index+1< keys.length){
-                next_rule_terminal=keys[key_index+1];
+                next_rule_variable =keys[key_index+1];
             }
             else{
                 next_rule =next_rule+1;
-                next_rule_terminal=keys[0];
+                next_rule_variable =keys[0];
             }
-            next_rule_content = output_rules_map.get(next_rule_terminal).get(0);
+            next_rule_content = output_rules_map.get(next_rule_variable).get(0);
         }
 
     }
@@ -478,15 +507,104 @@ public class Logic {
 
                 //Replace the startvariable
                 replaced = helpmethod.replaceChar(i,next_rule_content, (String) startvariable_translate.get(to_replaced));
-                int replaced_index = output_rules_map.get(next_rule_terminal).indexOf(next_rule_content);
-                output_rules_map.get(next_rule_terminal).set(replaced_index,replaced);
+                int replaced_index = output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
+                output_rules_map.get(next_rule_variable).set(replaced_index,replaced);
                 log_output += "Die Startvariable "+to_replaced+" wurde durch die Variable " + (String) startvariable_translate.get(to_replaced) + " ersetzt.\n";
                 next_rule_content = replaced;
             }
         }
+        setNextState();
+        returnList.add(log_output);
+        return returnList;
+    }
+
+    public List deleteChainRule(){
+        //Define some inter variables
+        List<String> returnList = new ArrayList<String>();
+        String log_output = "";
+
+        //chainrule_state = 0: look for a single variable
+        if (chainrule_state == 0) {
+            String old_next_rule_terminal = next_rule_variable;
+
+            //Check for each rule for a single Variable
+            while (old_next_rule_terminal == next_rule_variable) {
+                if (output_variable_list.contains(next_rule_content)) {
+                    if (!chain_rule_map.containsKey(next_rule_variable)) {
+                        chain_rule_map.put(next_rule_variable, new ArrayList<String>());
+                    }
+                    chain_rule_map.get(next_rule_variable).add(next_rule_content);
+                }
+                setNextState();
+            }
+        }
+
+        if(chainrule_state ==1){
+            if(chain_rule_map.containsKey(next_rule_variable)){
+
+                //bekommt Liste mit den einzusetzeden Variablen
+                List<String> replace_list = chain_rule_map.get(next_rule_variable);
+
+                //für jeden Eintrag der einzusetzenden Variablen
+                for(String replace_variable: replace_list){
+
+                    //Liste mit Regel pro einzusetzende Variable
+                    List<String> add_rule_list = output_rules_map.get(replace_variable);
+                    //list with the rule to add
+                    for(String add_rule :add_rule_list){
+                        //Es darf kein einzelnes Terminal sein
+                        if(!output_variable_list.contains(add_rule)){
+                            //Es darf die Regel darf nicht doppelt vorkommen
+                            if(!output_rules_map.get(next_rule_variable).contains(add_rule)){
+                                output_rules_map.get(next_rule_variable).add(add_rule);
+                                log_output += "Es wurde " + add_rule+ " bei " +next_rule_variable +" hinzugefügt.\n";
+                            }
+                        }
+                    }
+                }
+
+            }
+            for(String delete_var:output_variable_list){
+                if(output_rules_map.get(next_rule_variable).contains(delete_var)){
+                    output_rules_map.get(next_rule_variable).remove(delete_var);
+                }
+            }
+            String old_next_var = next_rule_variable;
+            while(old_next_var ==next_rule_variable){
+                setNextState();
+            }
+
+        }
+        if(next_rule==2&&chainrule_state==0){
+            next_rule=1;
+            chainrule_state =1;
+            Map<String, List<String>> chain_rule_map_copy = chain_rule_map;
+            for(String left_side: chain_rule_map_copy.keySet()) {
+                chain_rule_list.clear();
+                addToChainRule(left_side);
+                chain_rule_map.get(left_side).clear();
+                for(String a:chain_rule_list){
+                    chain_rule_map.get(left_side).add(a);
+                }
+                log_output+="kettenregel aufgelöst, Chainrulestate=" +chainrule_state  ;
+            }
+        }
+        if(next_rule==2&&chainrule_state==1){chainrule_state=2;}
+
 
         returnList.add(log_output);
         return returnList;
     }
 
+    public void addToChainRule(String left_side){
+        if(chain_rule_map.containsKey(left_side)) {
+            List<String> help_list = chain_rule_map.get(left_side);
+            for (String variable : help_list) {
+                if (!chain_rule_list.contains(variable)) {
+                    chain_rule_list.add(variable);
+                    addToChainRule(variable);
+                }
+            }
+        }
+    }
 }
