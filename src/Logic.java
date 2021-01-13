@@ -14,8 +14,9 @@ public class Logic {
 
     Map<String, List<String>> chain_rule_map = new HashMap<>();
     List<String> chain_rule_list = new ArrayList<>();
-    Dictionary startvariable_translate = new Hashtable();
-    Dictionary terminal_translate = new Hashtable();
+
+    Map<String,String> startvariable_translate = new HashMap<>();
+    Map<String,String> terminal_translate = new HashMap<>();
 
 
     final int count_rule = 3;
@@ -286,17 +287,11 @@ public class Logic {
         output_terminal_list.clear();
         output_variable_list.clear();
 
-        Enumeration keys = startvariable_translate.keys();
-        while(keys.hasMoreElements()){
-            startvariable_translate.remove(keys.nextElement());
-        }
-        Enumeration keys1 = startvariable_translate.keys();
-        while(keys1.hasMoreElements()){
-            startvariable_translate.remove(keys1.nextElement());
-        }
+        startvariable_translate.clear();
+        terminal_translate.clear();
         chain_rule_map.clear();
         chain_rule_list.clear();
-        chainrule_state=0;
+        chainrule_state =0;
         next_rule = 0;
         next_rule_variable = "";
         next_rule_content = "";
@@ -353,10 +348,10 @@ public class Logic {
                 }
                 break;
             case 1:
-                while(chainrule_state==0){
+                while(chainrule_state ==0){
                     log_output.append(single_step().get(0));
                 }
-                while(chainrule_state==1){
+                while(chainrule_state ==1){
                     log_output.append(single_step().get(0));
                 }
 
@@ -483,11 +478,10 @@ public class Logic {
             if(output_start_variable_list.contains(to_replaced)){
 
                 //Check if already a replace variable exits
-                Enumeration keys = startvariable_translate.keys();
-                while (keys.hasMoreElements()){
-                    String t =(String) keys.nextElement();
-                    if(t.equals(to_replaced)){
+                for(String keys: startvariable_translate.keySet()){
+                    if(keys.equals(to_replaced)){
                         add_new_variable = false;
+                        break;
                     }
                 }
 
@@ -500,7 +494,7 @@ public class Logic {
                 }
 
                 //Replace the startvariable
-                replaced = helpmethod.replaceChar(i,next_rule_content, (String) startvariable_translate.get(to_replaced));
+                replaced = helpmethod.replaceChar(i,next_rule_content, startvariable_translate.get(to_replaced));
                 int replaced_index = output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
                 output_rules_map.get(next_rule_variable).set(replaced_index,replaced);
                 log_output.append("Die Startvariable ").append(to_replaced).append(" wurde durch die Variable ").append(startvariable_translate.get(to_replaced)).append(" ersetzt.\n");
@@ -568,7 +562,7 @@ public class Logic {
             }
 
         }
-        if(next_rule==2&&chainrule_state==0){
+        if(next_rule==2&& chainrule_state ==0){
             next_rule=1;
             chainrule_state =1;
             Map<String, List<String>> chain_rule_map_copy = chain_rule_map;
@@ -582,7 +576,8 @@ public class Logic {
                 log_output.append("kettenregel aufgelöst, Chainrulestate=").append(chainrule_state);
             }
         }
-        if(next_rule==2&&chainrule_state==1){chainrule_state=2;}
+        if(next_rule==2&& chainrule_state ==1){
+            chainrule_state =2;}
 
 
         returnList.add(log_output.toString());
@@ -615,11 +610,11 @@ public class Logic {
             if (output_terminal_list.contains(char_to_check)&&word_to_check.length()>1) {
 
                 //Check if already a replace variable exits
-                Enumeration keys = terminal_translate.keys();
-                while (keys.hasMoreElements()){
-                    String t =(String) keys.nextElement();
-                    if(t.equals(char_to_check)){
+                //Check if already a replace variable exits
+                for(String keys: startvariable_translate.keySet()){
+                    if(keys.equals(char_to_check)){
                         add_new_variable = false;
+                        break;
                     }
                 }
 
@@ -633,7 +628,7 @@ public class Logic {
                     terminal_translate.put(char_to_check, "T" + terminal_translate.size());
                 }
 
-                String replace_Char = (String) terminal_translate.get(char_to_check);
+                String replace_Char = terminal_translate.get(char_to_check);
                 String replace = helpmethod.replaceChar(i+count_char_replace, next_rule_content, replace_Char);
                 int j = output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
                 output_rules_map.get(next_rule_variable).set(j,replace);
