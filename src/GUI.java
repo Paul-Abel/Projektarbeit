@@ -75,26 +75,24 @@ public class GUI  {
         buttonAddRule.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<String> returnList = logic.confirm_rule(textFieldRule.getText());
-                textAreaLog.append(returnList.get(0) +"\n");
-                textAreaInput.setText(returnList.get(1) +"\n");
+                textAreaLog.append(logic.confirm_rule(textFieldRule.getText())+"\n");
+                textAreaInput.setText(logic.getInputString()+"\n");
             }
         });
         buttonCommitInput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<String> returnList = logic.commit_input(textFieldTerminal.getText(),textFieldVariable.getText(),textFieldStartsymbol.getText());
-                textAreaLog.append(returnList.get(0) +"\n");
-                textAreaInput.setText(returnList.get(1) +"\n");
+                textAreaLog.append(logic.commit_input(textFieldTerminal.getText(),textFieldVariable.getText(),textFieldStartsymbol.getText()) +"\n");
+                textAreaInput.setText(logic.getInputString() +"\n");
             }
         });
         buttonCheckInput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<String> returnList = logic.check_input();
-                textAreaLog.append(returnList.get(0) +"\n");
-                textAreaInput.setText(returnList.get(1) +"\n");
-                if("Eingabe stimmt.".equals(returnList.get(0))){
+                String a = logic.check_input();
+                textAreaLog.append(a +"\n");
+                textAreaInput.setText(logic.getInputString() +"\n");
+                if("Eingabe stimmt.".equals(a)){
                     buttonAddRule.setEnabled(false);
                     buttonCheckInput.setEnabled(false);
                     buttonCommitInput.setEnabled(false);
@@ -102,7 +100,7 @@ public class GUI  {
                     buttonRuleStep.setEnabled(true);
                     buttonSingleStep.setEnabled(true);
                     buttonMultiStep.setEnabled(true);
-                    textAreaOutput.setText(returnList.get(2));
+                    textAreaOutput.setText(logic.getOutputString());
                 }
             }
         });

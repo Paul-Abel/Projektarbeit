@@ -21,4 +21,24 @@ public class Hilfmethoden {
         newWord =before.concat(replaceString).concat(after);
         return newWord;
     }
+
+    public String getVariable(int index, String word){
+        String variable = String.valueOf(word.charAt(index));
+        if(index+1>= word.length()){
+            return variable;
+        }
+
+        while (true){
+            index++;
+            if(index == word.length()){
+                return variable;
+            }
+            try {
+                Integer.parseInt(String.valueOf(word.charAt(index)));
+                variable= variable +(word.charAt(index));
+            } catch (NumberFormatException nfe) {
+                return variable;
+            }
+        }
+    }
 }

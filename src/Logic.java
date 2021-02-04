@@ -19,7 +19,7 @@ public class Logic {
     Map<String,String> terminal_translate = new HashMap<>();
 
 
-    final int count_rule = 3;
+    final int count_rule = 5;
     int next_rule = 0;
     String next_rule_variable = "";
     String next_rule_content = "";
@@ -30,10 +30,9 @@ public class Logic {
 
     //Checks the input and add a rule to the input_rule_map
     //rule_input is a rule from the gui, which should be wrote in a certain way. (Variable:rule1,rule2,rule3...)
-    public List<String> confirm_rule(String rule_input ){
+    public String confirm_rule(String rule_input ){
 
         //Definition for intern variables
-        List<String> returnList = new ArrayList<>();
         StringBuilder log_output = new StringBuilder();
         boolean rule_key_input_valid = true;
         boolean rule_value_input_valid = true;
@@ -81,17 +80,14 @@ public class Logic {
         }
 
         //send the log and input back to the gui
-        returnList.add(log_output.toString());
-        returnList.add(getInputString());
-        return returnList;
+        return log_output.toString();
     }
 
     //Checks the input and add a terminal, variable and the startvariable to their lists
     //terminal, variable and start_variable are the Input from their Textarea from the gui
-    public List<String> commit_input(String terminal, String variable, String start_variable){
+    public String commit_input(String terminal, String variable, String start_variable){
 
         //Definition for intern variables
-        List<String> returnList = new ArrayList<>();
         StringBuilder log_output= new StringBuilder();
 
         boolean terminal_valid = true;
@@ -187,16 +183,14 @@ public class Logic {
         }
 
         //send the log and input back to the gui
-        returnList.add(log_output.toString());
-        returnList.add(getInputString());
-        return returnList;
+        return log_output.toString();
+
     }
 
     //Makes a final input check before the input will be used
-    public List<String> check_input(){
+    public String check_input(){
 
         //Definition for intern variables
-        List<String> returnList = new ArrayList<>();
         StringBuilder log_output = new StringBuilder();
         boolean input_correct = true;
 
@@ -267,12 +261,7 @@ public class Logic {
         }
 
         //send the log and input back to the gui
-        returnList.add(log_output.toString());
-        returnList.add(getInputString());
-        if(input_correct){
-            returnList.add(getOutputString());
-        }
-        return returnList;
+        return log_output.toString();
     }
 
     //Resets all global variables
@@ -312,28 +301,35 @@ public class Logic {
     }
     public List<String> rule_step(){
         List<String> returnList = new ArrayList<>();
-        String log_output = "";
-
+        StringBuilder log_output = new StringBuilder();
         switch(next_rule) {
             case 0:
                 while(next_rule==0){
-                    multi_step();
+                   log_output.append(multi_step().get(0));
                 }
                 break;
             case 1:
                 while(next_rule==1){
-                    multi_step();
+                    log_output.append(multi_step().get(0));
                 }
                 break;
             case 2:
                 while(next_rule==2){
-                    multi_step();
+                    log_output.append(multi_step().get(0));
                 }
                 break;
+            case 3:
+                while(next_rule==3){
+                    log_output.append(multi_step().get(0));
+                }
+                break;
+            case 4:
+                log_output.append("fertig ......................................");
         }
 
-        log_output = log_output.replace("[","").replace("]","");
-        returnList.add(log_output);
+        String a = log_output.toString();
+        a = a.replace("[","").replace("]","");
+        returnList.add(a);
         returnList.add(getOutputString());
         return returnList;
     }
@@ -343,6 +339,7 @@ public class Logic {
         switch(next_rule) {
             case 0:
             case 2:
+            case 3:
                 for(int i=0; i<output_rules_map.get(next_rule_variable).size();i++){
                     log_output.append(single_step().get(0));
                 }
@@ -369,14 +366,16 @@ public class Logic {
 
         switch(next_rule) {
             case 0:
-                log_output+=replaceStartvariable();
+                log_output =replaceStartvariable()+"\n";
                 break;
             case 1:
-                log_output+=deleteChainRule()+ chain_rule_map.toString()+"\n";
+                log_output =deleteChainRule()+"\n";
                 break;
             case 2:
-                log_output+=replaceTerminal()+ terminal_translate.toString()+"\n";
+                log_output =replaceTerminal()+"\n";
                 break;
+            case 3:
+                log_output =reduceLength()+"\n";
         }
 
         log_output +=log_output.replace("[","").replace("]","");
@@ -421,6 +420,9 @@ public class Logic {
                 break;
             case 3:
                 next_rule_output = "Erstelle nur Regeln der Länge 2";
+                break;
+            case 4:
+                next_rule_output = "aaaa";
 
 
         }
@@ -435,7 +437,6 @@ public class Logic {
 
     //set the next state
     public void setNextState(){
-        Object[] a = output_rules_map.keySet().toArray();
         int key_index = 0;
         int value_index =output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
 
@@ -444,18 +445,18 @@ public class Logic {
             next_rule_content = output_rules_map.get(next_rule_variable).get(value_index+1);
         }
         else {
-            for(int i = 0; i < a.length; i++) {
-                if(a[i].equals(next_rule_variable)) {
+            for(int i = 0; i < output_variable_list.size(); i++) {
+                if(output_variable_list.get(i).equals(next_rule_variable)) {
                     key_index = i;
                     break;
                 }
             }
-            if(key_index+1< a.length){
-                next_rule_variable =a[key_index+1].toString();
+            if(key_index+1<output_variable_list.size()){
+                next_rule_variable =output_variable_list.get(key_index+1);
             }
             else{
                 next_rule =next_rule+1;
-                next_rule_variable =a[0].toString();
+                next_rule_variable =output_variable_list.get(0);
             }
             next_rule_content = output_rules_map.get(next_rule_variable).get(0);
         }
@@ -463,10 +464,9 @@ public class Logic {
     }
 
     //replace every startvariable on the right side of a rule
-    public List<String> replaceStartvariable(){
+    public String replaceStartvariable(){
 
         //Define some inter variables
-        List<String> returnList = new ArrayList<>();
         boolean add_new_variable = true;
         StringBuilder log_output = new StringBuilder();
         String to_replaced;
@@ -502,14 +502,12 @@ public class Logic {
             }
         }
         setNextState();
-        returnList.add(log_output.toString());
-        return returnList;
+        return log_output.toString();
     }
 
     //delete every chainrule
-    public List<String> deleteChainRule(){
+    public String deleteChainRule(){
         //Define some inter variables
-        List<String> returnList = new ArrayList<>();
         StringBuilder log_output = new StringBuilder();
 
         //chainrule_state = 0: look for a single variable
@@ -580,8 +578,7 @@ public class Logic {
             chainrule_state =2;}
 
 
-        returnList.add(log_output.toString());
-        return returnList;
+        return log_output.toString();
     }
 
     //adds every chainrule
@@ -598,9 +595,8 @@ public class Logic {
     }
 
     //replace
-    public List<String> replaceTerminal(){
+    public String replaceTerminal(){
         //Define some inter variables
-        List<String> returnList = new ArrayList<>();
         StringBuilder log_output = new StringBuilder();
         String word_to_check = next_rule_content;
         boolean add_new_variable = true;
@@ -621,6 +617,7 @@ public class Logic {
                 //Define new terminal and add it to the lists
                 if(add_new_variable) {
                     List<String> rule_to_add = new ArrayList<>();
+                    startvariable_translate.put(char_to_check,"T" + terminal_translate.size());
                     rule_to_add.add(char_to_check);
                     output_rules_map.put("T" + terminal_translate.size(), rule_to_add);
                     output_variable_list.add("T" + terminal_translate.size());
@@ -640,7 +637,41 @@ public class Logic {
         }
 
         setNextState();
-        returnList.add(log_output.toString());
-        return returnList;
+        return log_output.toString();
+    }
+
+    //set length of a rule to a size of 2
+    public String reduceLength(){
+        StringBuilder log_output = new StringBuilder();
+
+        String first_var = helpmethod.getVariable(0, next_rule_content);
+        String second_var ="";
+        if(first_var.length()<next_rule_content.length()) {
+            second_var = helpmethod.getVariable(first_var.length(), next_rule_content);
+        }
+
+        if((first_var.length()+second_var.length())<next_rule_content.length()){
+            String new_var ="";
+            int i = 0;
+            while(true){
+                new_var = "R"+i;
+                i++;
+                if(!output_variable_list.contains(new_var)){
+                    break;
+                }
+            }
+            output_variable_list.add(new_var);
+            log_output.append("Neue Variable ").append(new_var).append(" wurde hinzugefügt");
+            output_rules_map.put(new_var, new ArrayList<>());
+            String new_rule = next_rule_content.substring(first_var.length());
+            int index = output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
+            output_rules_map.get(next_rule_variable).set(index,first_var+new_var);
+            output_rules_map.get(new_var).add(new_rule);
+
+        }
+
+
+        setNextState();
+        return log_output.toString();
     }
 }
