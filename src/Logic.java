@@ -18,11 +18,18 @@ public class Logic {
     Map<String,String> startvariable_translate = new HashMap<>();
     Map<String,String> terminal_translate = new HashMap<>();
 
+    //Map<String, List<String>> grammar_var = new HashMap<>();
+    //Map<String, List<String>> grammar_ter = new HashMap<>();
+    //Map<String, List<String>> grammar_start = new HashMap<>();
+    Map<String, Map<String, List<String>>> grammar_rule= new HashMap<>();
+
+
 
     final int count_rule = 5;
     int next_rule = 0;
     String next_rule_variable = "";
     String next_rule_content = "";
+    String next_grammer = "";
 
     int chainrule_state = 0;
 
@@ -280,10 +287,12 @@ public class Logic {
         terminal_translate.clear();
         chain_rule_map.clear();
         chain_rule_list.clear();
+        grammar_rule.clear();
         chainrule_state =0;
         next_rule = 0;
         next_rule_variable = "";
         next_rule_content = "";
+        next_grammer = "";
     }
 
     public List<String> all_step(){
@@ -324,7 +333,14 @@ public class Logic {
                 }
                 break;
             case 4:
-                log_output.append("fertig ......................................");
+                while(next_rule==4){
+                    log_output.append(multi_step().get(0));
+                }
+            case 5:
+                while(next_rule==4){
+                    log_output.append(multi_step().get(0));
+                }
+
         }
 
         String a = log_output.toString();
@@ -340,6 +356,9 @@ public class Logic {
             case 0:
             case 2:
             case 3:
+            case 4:
+            case 5:
+                //TODO muss bei aktuellem starten nicht bei 0
                 for(int i=0; i<output_rules_map.get(next_rule_variable).size();i++){
                     log_output.append(single_step().get(0));
                 }
@@ -376,9 +395,19 @@ public class Logic {
                 break;
             case 3:
                 log_output =reduceLength()+"\n";
+                break;
+            case 4:
+                log_output = createGrammars() +"\n";
+                break;
+            case 5:
+                log_output = replaceFirstVar() +"\n";
+                if(next_rule == 6){
+                    log_output+= "Umformung ist fertig!\n";
+                }
+
         }
 
-        log_output +=log_output.replace("[","").replace("]","");
+        log_output +=log_output.replace("[","").replace("]","").replace("{","").replace("}","");
         returnList.add(log_output);
         returnList.add(getOutputString());
         return returnList;
@@ -422,17 +451,25 @@ public class Logic {
                 next_rule_output = "Erstelle nur Regeln der Länge 2";
                 break;
             case 4:
-                next_rule_output = "aaaa";
+                next_rule_output = "Erstelle neue Grammatiken für "+next_grammer;
 
 
         }
-
-        return "Nächster Schritt:"+ next_rule_output +"\n"+
-                "Nächste Regel:" + next_rule_variable + ": "+next_rule_content+"\n\n"+
-                "Terminal:\t"+ output_terminal_list.toString()+"\n"+
+        StringBuilder output = new StringBuilder("Nächster Schritt:" + next_rule_output + "\n" +
+                "Nächste Regel:" + next_rule_variable + ": " + next_rule_content + "\n\n" +
+                "Terminal:\t" + output_terminal_list.toString() + "\n" +
                 "Variable:\t" + output_variable_list.toString() + "\n" +
-                "Startvariable:\t" + output_start_variable_list.toString() + "\n"+
-                "Regeln" + rule;
+                "Startvariable:\t" + output_start_variable_list.toString() + "\n" +
+                "Regeln" + rule + "\n");
+        if(next_rule>=4){
+            output.append("Neue Regeln:\n");
+            for(String a: output_variable_list){
+                if(grammar_rule.containsKey(a)){
+                    output.append(a).append(": ").append(grammar_rule.get(a)).append("\n");
+                }
+            }
+        }
+        return output.toString();
     }
 
     //set the next state
@@ -651,7 +688,7 @@ public class Logic {
         }
 
         if((first_var.length()+second_var.length())<next_rule_content.length()){
-            String new_var ="";
+            String new_var;
             int i = 0;
             while(true){
                 new_var = "R"+i;
@@ -672,6 +709,121 @@ public class Logic {
 
 
         setNextState();
+        return log_output.toString();
+    }
+
+    //Create new grammars
+    public String createGrammars(){
+        StringBuilder log_output = new StringBuilder();
+        while(output_start_variable_list.contains(next_grammer) || next_grammer.equals("")){
+            if(next_grammer.equals("")) {
+                next_grammer = output_variable_list.get(0);
+            }
+            while(output_start_variable_list.contains(next_grammer)){
+                setNextState();
+                if(next_rule==5 && !next_grammer.equals(output_variable_list.get(output_variable_list.size() - 1))){
+                    next_rule =4;
+                    next_grammer = output_variable_list.get(output_variable_list.indexOf(next_grammer)+1);
+                    return log_output.toString();
+                }
+
+            }
+        }
+        if(output_start_variable_list.contains(next_rule_variable)){
+            while(output_start_variable_list.contains(next_rule_variable)){
+                setNextState();
+            }
+            return log_output.toString();
+        }
+
+        String first_var = helpmethod.getVariable(0, next_rule_content);
+        String second_var ="";
+        if(first_var.length()<next_rule_content.length()) {
+            second_var = helpmethod.getVariable(first_var.length(), next_rule_content);
+        }
+
+        if(!grammar_rule.containsKey(next_grammer)){
+            grammar_rule.put(next_grammer, new HashMap<>());
+            //grammar_start.put(next_rule_variable, new ArrayList<>());
+            //grammar_ter.put(next_rule_variable, new ArrayList<>());
+            //grammar_var.put(next_rule_variable, new ArrayList<>());
+        }
+        String new_var;
+        String new_rule1;
+        String new_rule2="";
+        String new_rule;
+        if(next_grammer.equals(next_rule_variable)){
+            //Regel Nummer 1
+            if(second_var.equals("")){
+                new_var = "S("+next_grammer+")";
+                new_rule1 = first_var;
+            }
+            //Regel Nummer 4
+            else{
+                new_var = first_var+"("+next_grammer+")";
+                new_rule1 = second_var;
+            }
+            new_rule=new_rule1+new_rule2;
+            //Add the rule
+            if(!grammar_rule.get(next_grammer).containsKey(new_var)) {
+                grammar_rule.get(next_grammer).put(new_var, new ArrayList<>());
+            }
+            grammar_rule.get(next_grammer).get(new_var).add(new_rule);
+        }
+
+        //Regel Nummer 2
+        if(second_var.equals("")){
+            new_var = "S("+next_grammer+")";
+            new_rule1 = first_var;
+        }
+        //Regel Nummer 3
+        else{
+            new_var = first_var+"("+next_grammer+")";
+            new_rule1 = second_var;
+
+
+        }
+        new_rule2 = next_rule_variable+"("+next_grammer+")";
+        new_rule=new_rule1+new_rule2;
+
+        //Add the rule
+        if(!grammar_rule.get(next_grammer).containsKey(new_var)) {
+            grammar_rule.get(next_grammer).put(new_var, new ArrayList<>());
+        }
+        grammar_rule.get(next_grammer).get(new_var).add(new_rule);
+
+        setNextState();
+        if(next_rule==5 && !next_grammer.equals(output_variable_list.get(output_variable_list.size() - 1))){
+            next_rule =4;
+            next_grammer = output_variable_list.get(output_variable_list.indexOf(next_grammer)+1);
+        }
+        return log_output.toString();
+    }
+
+    public String replaceFirstVar(){
+        StringBuilder log_output = new StringBuilder();
+
+        String first_var = helpmethod.getVariable(0, next_rule_content);
+        String second_var ="";
+        if(first_var.length()<next_rule_content.length()) {
+            second_var = helpmethod.getVariable(first_var.length(), next_rule_content);
+        }
+        String old_next_rule_variable = next_rule_variable;
+        String old_next_rule_content = next_rule_content;
+        setNextState();
+
+        if(!second_var.equals("") && output_variable_list.contains(first_var) &&output_variable_list.contains(second_var)){
+            String startvar = "S("+first_var+")";
+            List<String> replace_list = grammar_rule.get(first_var).get(startvar);
+            int index_of_var  = output_rules_map.get(old_next_rule_variable).indexOf(old_next_rule_content);
+            output_rules_map.get(old_next_rule_variable).remove(old_next_rule_content);
+            for(String replace_rule:replace_list){
+
+                output_rules_map.get(old_next_rule_variable).add(index_of_var, replace_rule+second_var);
+                index_of_var++;
+            }
+        }
+
         return log_output.toString();
     }
 }

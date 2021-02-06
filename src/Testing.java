@@ -3,10 +3,16 @@ import java.util.*;
 public class Testing {
 
     public static void main(String[] args) {
-        String test = "Hello World";
-        String test1= "a";
-        //System.out.println(test1.length());
-        //System.out.println(Hilfmethoden.replaceChar(0, test1, "tttt"));
+        List<String> chain_rule_list = new ArrayList<>();
+        chain_rule_list.add("1");
+        chain_rule_list.add("2");
+        chain_rule_list.add("3");
+        chain_rule_list.add("4");
+        chain_rule_list.add("5");
+        chain_rule_list.add(1, "11");
+        chain_rule_list.add(1, "12");
+        chain_rule_list.add(1, "13");
+
 
 
     }
