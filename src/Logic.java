@@ -461,11 +461,19 @@ public class Logic {
                 "Variable:\t" + output_variable_list.toString() + "\n" +
                 "Startvariable:\t" + output_start_variable_list.toString() + "\n" +
                 "Regeln" + rule + "\n");
-        if(next_rule>=4){
+        if(next_rule==4){
             output.append("Neue Regeln:\n");
             for(String a: output_variable_list){
                 if(grammar_rule.containsKey(a)){
                     output.append(a).append(": ").append(grammar_rule.get(a)).append("\n");
+                }
+            }
+        }
+        if(next_rule==5){
+            output.append("Startvariablen:\n");
+            for(String a: output_variable_list){
+                if(startvariable_map.containsKey("S("+a+")")){
+                    output.append("S("+a+")").append(": ").append(startvariable_map.get("S("+a+")")).append("\n");
                 }
             }
         }
@@ -643,7 +651,6 @@ public class Logic {
             if (output_terminal_list.contains(char_to_check)&&word_to_check.length()>1) {
 
                 //Check if already a replace variable exits
-                //Check if already a replace variable exits
                 for(String keys: startvariable_translate.keySet()){
                     if(keys.equals(char_to_check)){
                         add_new_variable = false;
@@ -711,10 +718,14 @@ public class Logic {
         setNextState();
         return log_output.toString();
     }
+    List<String> copy_output_variable_list = new ArrayList<>();
+    Map<String, List<String>> startvariable_map = new HashMap<>();
 
     //Create new grammars
     public String createGrammars(){
         StringBuilder log_output = new StringBuilder();
+        //copy_output_variable_list = output_variable_list;
+
         while(output_start_variable_list.contains(next_grammer) || next_grammer.equals("")){
             if(next_grammer.equals("")) {
                 next_grammer = output_variable_list.get(0);
@@ -744,9 +755,7 @@ public class Logic {
 
         if(!grammar_rule.containsKey(next_grammer)){
             grammar_rule.put(next_grammer, new HashMap<>());
-            //grammar_start.put(next_rule_variable, new ArrayList<>());
-            //grammar_ter.put(next_rule_variable, new ArrayList<>());
-            //grammar_var.put(next_rule_variable, new ArrayList<>());
+
         }
         String new_var;
         String new_rule1;
@@ -775,15 +784,25 @@ public class Logic {
         if(second_var.equals("")){
             new_var = "S("+next_grammer+")";
             new_rule1 = first_var;
+            //Add the rule
+            if(!grammar_rule.get(next_grammer).containsKey(new_var)) {
+                grammar_rule.get(next_grammer).put(new_var, new ArrayList<>());
+            }
         }
         //Regel Nummer 3
         else{
             new_var = first_var+"("+next_grammer+")";
             new_rule1 = second_var;
-
-
+            //Add the variable
+            if(!copy_output_variable_list.contains(new_var)){
+                copy_output_variable_list.add(new_var);
+            }
         }
         new_rule2 = next_rule_variable+"("+next_grammer+")";
+        //Add the variable
+        if(!copy_output_variable_list.contains(new_rule2)){
+            copy_output_variable_list.add(new_rule2);
+        }
         new_rule=new_rule1+new_rule2;
 
         //Add the rule
@@ -797,6 +816,36 @@ public class Logic {
             next_rule =4;
             next_grammer = output_variable_list.get(output_variable_list.indexOf(next_grammer)+1);
         }
+        if(next_rule==5 && next_grammer.equals(output_variable_list.get(output_variable_list.size() - 1))){
+            //output_variable_list = copy_output_variable_list;
+            for(int i=0;i<output_variable_list.size();i++){
+                String grammar = output_variable_list.get(i);
+                if(grammar_rule.containsKey(grammar)){
+                    Map<String, List<String>> grammer_map =  grammar_rule.get(grammar);
+                    for(Object key :grammer_map.keySet()){
+                        if(!(key.toString().charAt(0)=='S')){
+                            for(int j=0; j<grammer_map.get(key.toString()).size();j++){
+                                if(!output_rules_map.containsKey(key.toString())){
+                                    output_rules_map.put(key.toString(),new ArrayList<>());
+                                }
+                                if(!output_variable_list.contains(key.toString())){
+                                    output_variable_list.add(key.toString());
+                                }
+                                output_rules_map.get(key.toString()).add(grammer_map.get(key.toString()).get(j));
+                            }
+                        }
+
+                    }
+                    for(Object key :grammer_map.keySet()){
+                        if((key.toString().charAt(0)=='S')){
+                            startvariable_map.put(key.toString(),grammar_rule.get(grammar).get(key.toString()));
+                        }
+
+                    }
+
+                }
+            }
+        }
         return log_output.toString();
     }
 
@@ -806,7 +855,7 @@ public class Logic {
         String first_var = helpmethod.getVariable(0, next_rule_content);
         String second_var ="";
         if(first_var.length()<next_rule_content.length()) {
-            second_var = helpmethod.getVariable(first_var.length(), next_rule_content);
+            second_var = next_rule_content.substring(first_var.length());
         }
         String old_next_rule_variable = next_rule_variable;
         String old_next_rule_content = next_rule_content;
@@ -818,8 +867,17 @@ public class Logic {
             int index_of_var  = output_rules_map.get(old_next_rule_variable).indexOf(old_next_rule_content);
             output_rules_map.get(old_next_rule_variable).remove(old_next_rule_content);
             for(String replace_rule:replace_list){
-
                 output_rules_map.get(old_next_rule_variable).add(index_of_var, replace_rule+second_var);
+                index_of_var++;
+            }
+        }
+        if(second_var.equals("") && output_variable_list.contains(first_var)){
+            String startvar = "S("+first_var+")";
+            List<String> replace_list = grammar_rule.get(first_var).get(startvar);
+            int index_of_var  = output_rules_map.get(old_next_rule_variable).indexOf(old_next_rule_content);
+            output_rules_map.get(old_next_rule_variable).remove(old_next_rule_content);
+            for(String replace_rule:replace_list){
+                output_rules_map.get(old_next_rule_variable).add(index_of_var, replace_rule);
                 index_of_var++;
             }
         }
