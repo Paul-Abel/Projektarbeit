@@ -18,9 +18,6 @@ public class Logic {
     Map<String,String> startvariable_translate = new HashMap<>();
     Map<String,String> terminal_translate = new HashMap<>();
 
-    //Map<String, List<String>> grammar_var = new HashMap<>();
-    //Map<String, List<String>> grammar_ter = new HashMap<>();
-    //Map<String, List<String>> grammar_start = new HashMap<>();
     Map<String, Map<String, List<String>>> grammar_rule= new HashMap<>();
 
 
@@ -283,6 +280,8 @@ public class Logic {
         output_terminal_list.clear();
         output_variable_list.clear();
 
+        copy_output_variable_list.clear();
+        startvariable_map.clear();
         startvariable_translate.clear();
         terminal_translate.clear();
         chain_rule_map.clear();
@@ -299,12 +298,11 @@ public class Logic {
         List<String> returnList = new ArrayList<>();
         StringBuilder log_output = new StringBuilder();
 
-        for(int i = next_rule; i<count_rule; i++ ){
+        for(int i = next_rule; i<=count_rule; i++ ){
             log_output.append(rule_step().get(0));
         }
 
-        log_output.append(log_output.toString().replace("[", "").replace("]", ""));
-        returnList.add(log_output.toString());
+        returnList.add(log_output.toString().replace("[", "").replace("]", ""));
         returnList.add(getOutputString());
         return returnList;
     }
@@ -336,78 +334,71 @@ public class Logic {
                 while(next_rule==4){
                     log_output.append(multi_step().get(0));
                 }
+                break;
             case 5:
-                while(next_rule==4){
+                while(next_rule==5){
                     log_output.append(multi_step().get(0));
                 }
 
         }
-
-        String a = log_output.toString();
-        a = a.replace("[","").replace("]","");
-        returnList.add(a);
+        returnList.add(log_output.toString().replace("[","").replace("]",""));
         returnList.add(getOutputString());
         return returnList;
     }
     public List<String> multi_step(){
         List<String> returnList = new ArrayList<>();
         StringBuilder log_output = new StringBuilder();
-        switch(next_rule) {
-            case 0:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                //TODO muss bei aktuellem starten nicht bei 0
-                for(int i=0; i<output_rules_map.get(next_rule_variable).size();i++){
-                    log_output.append(single_step().get(0));
-                }
-                break;
-            case 1:
+        if(next_rule!=1 && next_rule != 6) {
+            int index = output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
+            for (int i = index; i < output_rules_map.get(next_rule_variable).size(); i++) {
+                log_output.append(single_step().get(0));
+            }
+        }
+        else if(next_rule==1){
                 while(chainrule_state ==0){
                     log_output.append(single_step().get(0));
                 }
                 while(chainrule_state ==1){
                     log_output.append(single_step().get(0));
                 }
-
-                break;
         }
-
-        log_output.append(log_output.toString().replace("[", "").replace("]", ""));
-        returnList.add(log_output.toString());
+        else{
+            log_output.append("Umformung ist fertig!\n");
+        }
+        returnList.add((log_output.toString().replace("[", "").replace("]", "")));
         returnList.add(getOutputString());
         return returnList;
     }
     public List<String> single_step(){
         List<String> returnList = new ArrayList<>();
+        returnList.clear();
         String log_output = "";
 
         switch(next_rule) {
             case 0:
-                log_output =replaceStartvariable()+"\n";
+                log_output =replaceStartvariable();
                 break;
             case 1:
-                log_output =deleteChainRule()+"\n";
+                log_output =deleteChainRule();
                 break;
             case 2:
-                log_output =replaceTerminal()+"\n";
+                log_output =replaceTerminal();
                 break;
             case 3:
-                log_output =reduceLength()+"\n";
+                log_output =reduceLength();
                 break;
             case 4:
-                log_output = createGrammars() +"\n";
+                log_output = createGrammars();
                 break;
             case 5:
-                log_output = replaceFirstVar() +"\n";
-                if(next_rule == 6){
-                    log_output+= "Umformung ist fertig!\n";
-                }
+                log_output = replaceFirstVar();
+                break;
+            case 6:
+                log_output = "Umformung ist fertig!\n";
 
         }
 
-        log_output +=log_output.replace("[","").replace("]","").replace("{","").replace("}","");
+        log_output =log_output.replace("[","").replace("]","").replace("{","").replace("}","");
         returnList.add(log_output);
         returnList.add(getOutputString());
         return returnList;
@@ -452,6 +443,9 @@ public class Logic {
                 break;
             case 4:
                 next_rule_output = "Erstelle neue Grammatiken für "+next_grammer;
+                break;
+            case 5:
+                next_rule_output = "Ersetzte die erste Variable";
 
 
         }
@@ -705,12 +699,13 @@ public class Logic {
                 }
             }
             output_variable_list.add(new_var);
-            log_output.append("Neue Variable ").append(new_var).append(" wurde hinzugefügt");
+            log_output.append("Neue Variable ").append(new_var).append(" wurde hinzugefügt.\n");
             output_rules_map.put(new_var, new ArrayList<>());
             String new_rule = next_rule_content.substring(first_var.length());
             int index = output_rules_map.get(next_rule_variable).indexOf(next_rule_content);
             output_rules_map.get(next_rule_variable).set(index,first_var+new_var);
             output_rules_map.get(new_var).add(new_rule);
+            log_output.append("Die Regel "+new_var+"->"+new_rule+" wurde hinzugefügt.\n");
 
         }
 
@@ -766,24 +761,31 @@ public class Logic {
             if(second_var.equals("")){
                 new_var = "S("+next_grammer+")";
                 new_rule1 = first_var;
+                log_output.append("Regel 1:");
             }
             //Regel Nummer 4
             else{
                 new_var = first_var+"("+next_grammer+")";
                 new_rule1 = second_var;
+                log_output.append("Regel 4:");
             }
+            //Add the variable
             new_rule=new_rule1+new_rule2;
-            //Add the rule
             if(!grammar_rule.get(next_grammer).containsKey(new_var)) {
                 grammar_rule.get(next_grammer).put(new_var, new ArrayList<>());
             }
+            //Add the rule
             grammar_rule.get(next_grammer).get(new_var).add(new_rule);
+            log_output.append(" Aus "+next_rule_variable+"->"+next_rule_content+" wird " +new_var+"-> "+new_rule+"\n");
+
+
         }
 
         //Regel Nummer 2
         if(second_var.equals("")){
             new_var = "S("+next_grammer+")";
             new_rule1 = first_var;
+            log_output.append("Regel 2:");
             //Add the rule
             if(!grammar_rule.get(next_grammer).containsKey(new_var)) {
                 grammar_rule.get(next_grammer).put(new_var, new ArrayList<>());
@@ -793,6 +795,7 @@ public class Logic {
         else{
             new_var = first_var+"("+next_grammer+")";
             new_rule1 = second_var;
+            log_output.append("Regel 3:");
             //Add the variable
             if(!copy_output_variable_list.contains(new_var)){
                 copy_output_variable_list.add(new_var);
@@ -810,6 +813,7 @@ public class Logic {
             grammar_rule.get(next_grammer).put(new_var, new ArrayList<>());
         }
         grammar_rule.get(next_grammer).get(new_var).add(new_rule);
+        log_output.append(" Aus "+next_rule_variable+"->"+next_rule_content+" wird " +new_var+"-> "+new_rule+"\n");
 
         setNextState();
         if(next_rule==5 && !next_grammer.equals(output_variable_list.get(output_variable_list.size() - 1))){
@@ -818,6 +822,7 @@ public class Logic {
         }
         if(next_rule==5 && next_grammer.equals(output_variable_list.get(output_variable_list.size() - 1))){
             //output_variable_list = copy_output_variable_list;
+            log_output.append("Es werden nun alle aus Regel 2 und 3 entstanden Regeln der Grammatik hinzugefügt.\n");
             for(int i=0;i<output_variable_list.size();i++){
                 String grammar = output_variable_list.get(i);
                 if(grammar_rule.containsKey(grammar)){
@@ -861,11 +866,12 @@ public class Logic {
         String old_next_rule_content = next_rule_content;
         setNextState();
 
-        if(!second_var.equals("") && output_variable_list.contains(first_var) &&output_variable_list.contains(second_var)){
+        if(!second_var.equals("") && output_variable_list.contains(first_var)){
             String startvar = "S("+first_var+")";
             List<String> replace_list = grammar_rule.get(first_var).get(startvar);
             int index_of_var  = output_rules_map.get(old_next_rule_variable).indexOf(old_next_rule_content);
             output_rules_map.get(old_next_rule_variable).remove(old_next_rule_content);
+            log_output.append("Für die Regel " +old_next_rule_variable+"->"+old_next_rule_content+" wird "+first_var+" durch "+replace_list.toString()+" ersetzt.\n");
             for(String replace_rule:replace_list){
                 output_rules_map.get(old_next_rule_variable).add(index_of_var, replace_rule+second_var);
                 index_of_var++;
@@ -876,6 +882,7 @@ public class Logic {
             List<String> replace_list = grammar_rule.get(first_var).get(startvar);
             int index_of_var  = output_rules_map.get(old_next_rule_variable).indexOf(old_next_rule_content);
             output_rules_map.get(old_next_rule_variable).remove(old_next_rule_content);
+            log_output.append("Für die Regel " +old_next_rule_variable+"->"+old_next_rule_content+" wird "+first_var+" durch "+replace_list.toString()+" ersetzt.\n");
             for(String replace_rule:replace_list){
                 output_rules_map.get(old_next_rule_variable).add(index_of_var, replace_rule);
                 index_of_var++;
