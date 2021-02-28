@@ -62,7 +62,7 @@ public class GUI  {
         JTextArea textAreaLog = new JTextArea();
         JTextArea textAreaOutput = new JTextArea();
         JScrollPane textAreaInputScroll = textAreaScrollable(400,100,300,400, textAreaInput);
-        JScrollPane textAreaOutputScroll = textAreaScrollable(750,100,300,400, textAreaOutput);
+        JScrollPane textAreaOutputScroll = textAreaScrollable(750,100,500,400, textAreaOutput);
         JScrollPane textAreaLogScroll = textAreaScrollable(25,550,1230,300, textAreaLog);
         gui.add(textAreaInputScroll);
         gui.add(textAreaLogScroll);
@@ -72,6 +72,8 @@ public class GUI  {
         gui.setLayout(null);//using no layout managers
         gui.setVisible(true);//making the frame visible
 
+
+        //Add some ActionListener for the Buttons
         buttonAddRule.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -164,7 +166,7 @@ public class GUI  {
         });
 
     }
-
+    //Define a
     public static JFrame frame(){
         JFrame gui = new JFrame();//creating instance of JFrame
         gui.setSize(1280,900);//400 width and 500 height
